@@ -1,4 +1,10 @@
-(function( exports ){
+(function( exports ) {
+
+	const
+
+	 	OPENQUOTES = '(',
+		CLOSEQUOTES = ')',
+		POINT = '.';
 
 	function Calculator() {}
 
@@ -63,6 +69,48 @@
 
 	})();
 
+	function sortArray( list ) {
+
+		var length = list.length,
+			currentResult = '',
+			currentCounter = 0,
+			result = [],
+			value,
+			currentValue;
+
+		for ( var i = 0; i < length; i++ ) {
+
+			value = list[i];
+
+			if ( parseFloat( value ) ) {
+				currentResult += value;
+
+			} else
+
+				if ( value === POINT ) {
+					currentResult += value;
+
+				} else
+
+					if ( checkAction( value ) ) {
+
+						// if( currentResult !== '' ) {
+						// 	debugger
+						// 	result[ currentCounter ] = currentResult;
+						// 	currentCounter++;
+						// }
+
+						result[ currentCounter ] = value;
+						currentCounter++;
+						currentResult = '';
+					}
+
+		}
+
+		result[ currentCounter ] = currentResult
+		return result;
+	}
+
 
 	Calculator.fn = Calculator.prototype;
 
@@ -81,29 +129,30 @@
 
 				result += currentValue;
 
-			} else if( checkSimbol( currentValue ) ) {
+			} else
+
+				if( checkSimbol( currentValue ) ) {
 
 						result += currentValue;
 
-					} else if ( checkAction( currentValue ) ) {
+				} else
+
+					if ( checkAction( currentValue ) ) {
 
 						result += currentValue;
 
-							} else {
+					} else {
 
-								return isNotCorrect( currentValue, i );
-							}
+						return isNotCorrect( currentValue, i );
+					}
 		}
 
-		return result; // next method
+		return result;
 	}
 
 	Calculator.fn.checkData = function ( string ) {
 
 		var length = string.length,
-			openQuotes = '(',
-			closeQuotes = ')',
-			point = '.',
 			valuePlus = '+',
 			valueMinus = '-',
 			counterOpenQuotes = 0,
@@ -122,89 +171,107 @@
 
 					if ( numbers( lastElementInResult ) ) {
 						result += currentValue, lastElementInResult = currentValue;
-						continue;
-					}
-					if ( ( checkAction( lastElementInResult ) ) ) {
-						result += currentValue, lastElementInResult = currentValue;
-						continue;
-					}
-					if ( lastElementInResult === openQuotes ) {
-						result += currentValue, lastElementInResult = currentValue;
-						continue;
-					}
-					if ( lastElementInResult === point ) {
-						result += currentValue, lastElementInResult = currentValue;
-						continue;
 
-					} else {
-						return isNotCorrect( currentValue, i );
-					}
+					} else
 
-				} else if ( checkAction( currentValue ) ) {
+						if ( ( checkAction( lastElementInResult ) ) ) {
+							result += currentValue, lastElementInResult = currentValue;
 
-							if ( numbers( lastElementInResult ) ) {
+						} else
+
+							if ( lastElementInResult === OPENQUOTES ) {
 								result += currentValue, lastElementInResult = currentValue;
-								continue;
-							}
-							if ( lastElementInResult === closeQuotes ) {
-								result += currentValue, lastElementInResult = currentValue;
-								continue;
-							}
-							if ( lastElementInResult === openQuotes && currentValue === valuePlus ) {
-								result += currentValue, lastElementInResult = currentValue;
-								continue;
-							}
-							if ( lastElementInResult === openQuotes && currentValue === valueMinus ) {
-								result += currentValue, lastElementInResult = currentValue;
-								continue;
 
-							} else {
-								return isNotCorrect( currentValue, i );
-							}
+							} else
 
-						} else if ( currentValue === openQuotes ) {
+								if ( lastElementInResult === POINT ) {
+									result += currentValue, lastElementInResult = currentValue;
 
-									if ( lastElementInResult === openQuotes ) {
+								} else {
+
+									return isNotCorrect( currentValue, i );
+								}
+
+				} else
+
+					if ( checkAction( currentValue ) ) {
+
+						if ( numbers( lastElementInResult ) ) {
+							result += currentValue, lastElementInResult = currentValue;
+
+						} else
+
+							if ( lastElementInResult === CLOSEQUOTES ) {
+								result += currentValue, lastElementInResult = currentValue;
+
+							} else
+
+								if ( lastElementInResult === OPENQUOTES && currentValue === valuePlus ) {
+									result += currentValue, lastElementInResult = currentValue;
+
+								} else
+
+									if ( lastElementInResult === OPENQUOTES && currentValue === valueMinus ) {
 										result += currentValue, lastElementInResult = currentValue;
-										counterOpenQuotes++;
-										continue;
-									}
-									if ( checkAction( lastElementInResult ) ) {
-										result += currentValue, lastElementInResult = currentValue;
-										counterOpenQuotes++;
-										continue;
 
 									} else {
+
 										return isNotCorrect( currentValue, i );
 									}
-								} else if ( currentValue === closeQuotes ) {
 
-											if ( lastElementInResult === closeQuotes ) {
-												result += currentValue, lastElementInResult = currentValue;
-												counterCloseQuotes++;
-												continue;
-											}
+					} else
+
+						if ( currentValue === OPENQUOTES ) {
+
+							if ( lastElementInResult === OPENQUOTES ) {
+								result += currentValue, lastElementInResult = currentValue;
+								counterOpenQuotes++;
+
+							} else
+
+								if ( checkAction( lastElementInResult ) ) {
+									result += currentValue, lastElementInResult = currentValue;
+									counterOpenQuotes++;
+
+								} else {
+
+										return isNotCorrect( currentValue, i );
+									}
+
+								} else
+
+									if ( currentValue === CLOSEQUOTES ) {
+
+										if ( lastElementInResult === CLOSEQUOTES ) {
+											result += currentValue, lastElementInResult = currentValue;
+											counterCloseQuotes++;
+
+										} else
+
 											if ( checkNumber( lastElementInResult ) ) {
 												result += currentValue, lastElementInResult = currentValue;
 												counterCloseQuotes++;
-												continue;
 
 											} else {
+
 												return isNotCorrect( currentValue, i );
 											}
-										} else if ( currentValue === point ) {
+									} else
 
-													if ( numbers( lastElementInResult ) ) {
-														result += currentValue, lastElementInResult = currentValue;
-														continue;
+									if ( currentValue === POINT ) {
 
-													} else {
-														return isNotCorrect( currentValue, i );
-													}
-												} else {
+										if ( numbers( lastElementInResult ) ) {
+											result += currentValue, lastElementInResult = currentValue;
 
-													return isNotCorrect( currentValue, i );
-												}
+										} else {
+
+											return isNotCorrect( currentValue, i );
+										}
+
+									} else {
+
+										return isNotCorrect( currentValue, i );
+									}
 
 			} else {
 
@@ -213,27 +280,71 @@
 					result += currentValue;
 					lastElementInResult = currentValue;
 
-				} else if ( numbers( currentValue ) ) {
+				} else
+
+					if ( numbers( currentValue ) ) {
 
 							result += currentValue;
 							lastElementInResult = currentValue;
 
-						} else if ( currentValue === openQuotes ) {
+					} else
 
-									result += currentValue;
-									lastElementInResult = currentValue;
-									counterOpenQuotes++;
+						if ( currentValue === OPENQUOTES ) {
 
-								} else {
+							result += currentValue;
+							lastElementInResult = currentValue;
+							counterOpenQuotes++;
 
-									return isNotCorrect( currentValue, i );
-								}
+						} else {
+
+							return isNotCorrect( currentValue, i );
+						}
 			}
 		}
 
 		if ( counterOpenQuotes === counterCloseQuotes ) return result;
 		else return isNotCorrect( 'incorrect number of quotes', 0 );
-	}
+	};
+
+	Calculator.fn.getSumInQuotes = function( string ) {
+
+		string = string.split('');
+
+		var currentValue,
+			cashPosition,
+			result;
+
+		for ( var i = 0; i < string.length; i++ ) {
+
+			currentValue = string[i];
+
+			if ( currentValue === OPENQUOTES ) {
+				cashPosition = i;
+
+			} else
+
+				if ( currentValue === CLOSEQUOTES ) {
+					result = string.slice( cashPosition + 1, i );
+					result = sortArray( result );
+
+					if ( result.length % 2 === 0 ) {
+						result = parseFloat( result[0] + result[1] );
+						string.splice( cashPosition, i + 1 - cashPosition, result + '' )
+						cashPosition = 0;
+						i = -1;
+
+					} else {
+
+							result = this.getTotalSum( result );
+							string.splice( cashPosition, i + 1 - cashPosition, result + '' )
+							cashPosition = 0;
+							i = -1;
+						}
+				}
+		}
+
+		return result
+	};
 
 	Calculator.fn.getTotalSum = function( list ) {
 
@@ -244,8 +355,8 @@
 
 		for ( var l = 0, i = 1, r = 2; l < list.length; i += 2, l += 2, r += 2 ) {
 
-			numberLeft = parseInt( list[ l ] );
-			numberRight = parseInt( list[ r ] );
+			numberLeft = parseFloat( list[ l ] );
+			numberRight = parseFloat( list[ r ] );
 			action = list[ i ];
 
 			if ( action === '*' || action === '/' ) {
@@ -256,19 +367,21 @@
 					list.splice( l, 3, result );
 					i -= 2, l -= 2, r -= 2;
 
-				} else if ( action === '/' ) {
+				} else
 
-					result = getCurrentSum['/']( numberLeft, numberRight );
-					list.splice( l, 3, result );
-					i -= 2, l -= 2, r -= 2;
+					if ( action === '/' ) {
+
+						result = getCurrentSum['/']( numberLeft, numberRight );
+						list.splice( l, 3, result );
+						i -= 2, l -= 2, r -= 2;
 				}
 			}
 		}
 
 		for ( var l = 0, i = 1, r = 2; l < list.length; i += 2, l += 2, r += 2 ) {
 
-			numberLeft = parseInt( list[ l ] );
-			numberRight = parseInt( list[ r ] );
+			numberLeft = parseFloat( list[ l ] );
+			numberRight = parseFloat( list[ r ] );
 			action = list[ i ];
 
 			if ( action === '+' || action === '-' ) {
@@ -279,16 +392,18 @@
 					list.splice( l, 3, result );
 					i -= 2, l -= 2, r -= 2;
 
-				} else if ( action === '-' ) {
+				} else
 
-					result = getCurrentSum['-']( numberLeft, numberRight );
-					list.splice( l, 3, result );
-					i -= 2, l -= 2, r -= 2;
-				}
+					if ( action === '-' ) {
+
+						result = getCurrentSum['-']( numberLeft, numberRight );
+						list.splice( l, 3, result );
+						i -= 2, l -= 2, r -= 2;
+					}
 			}
 		}
 
-		return list[ 0 ];//////
+		return list[ 0 ];
 	};
 
 
