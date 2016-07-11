@@ -1,9 +1,9 @@
 (function(){
 
-var str = '(-3)-8';
+	var str = '(-3)';
 
-var calc = new Calculator();
-console.log( calc.dataValidation( str ) );
-console.log( calc.getSumInQuotes( str ) );
+	var calc = new Calculator();
+	console.log( calc.dataValidation( str ) );
+	console.log( calc.getSumInQuotes( str ) );
 
 })();
