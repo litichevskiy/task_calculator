@@ -6,21 +6,15 @@
 		CLOSEQUOTES = ')',
 		POINT = '.';
 
-	function Calculator() {}
-
-	function checkNumber( str ) {
-		var number = parseFloat( str );
-		if ( number ) return number;
-		else return false;
-
-	}
+	function Calculator() {};
 
 	function isNotCorrect( val, position ) {
 		return{
-			value : 'Incorrect value: ' + val,
-			position : position
+			value    : 'Incorrect value: ' + val,
+			position : position,
+            result   : false
 		}
-	}
+	};
 
 	var numbers = (function(){
 		var storageNumbers = {
@@ -82,27 +76,24 @@
 
 			value = list[i];
 
-			if ( parseFloat( value ) ) {
-				currentResult += value;
+			if ( checkAction( value ) ) {
 
-			} else
+                result[ currentCounter ] = currentResult;
+                currentCounter++;
+                result[ currentCounter ] = value;
+                currentCounter++;
+                currentResult = '';
 
-				if ( value === POINT ) {
-					currentResult += value;
+            } else
 
-				} else
+                if ( value === POINT ) {
+                    currentResult += value;
 
-					if ( checkAction( value ) ) {
+                } else
 
-						// if( currentResult !== '' ) {
-						// 	debugger
-						// 	result[ currentCounter ] = currentResult;
-						// 	currentCounter++;
-						// }
+                    if ( typeof parseFloat( value ) === 'number' ) {
 
-						result[ currentCounter ] = value;
-						currentCounter++;
-						currentResult = '';
+				        currentResult += value;
 					}
 
 		}
@@ -114,6 +105,27 @@
 
 	Calculator.fn = Calculator.prototype;
 
+    Calculator.fn.calculateAmount = function( string ) {
+
+            if( typeof string !== 'string' ) throw('Incorrect value: ', string );
+
+        var data = this.dataValidation( string );
+
+            if ( data.result === false ) return data;
+            else data = this.checkData( data );
+
+            if ( data.result === false ) return data;
+            else data = this.getSumInQuotes( data );
+
+            data = this.getTotalSum( data );
+
+            if ( typeof data[0] !== 'number' ) return isNotCorrect( data, 0 );
+
+            return{
+                result : data[0]
+            }
+
+    };
 
 	Calculator.fn.dataValidation = function( string ) {
 
@@ -242,13 +254,13 @@
 
 									if ( currentValue === CLOSEQUOTES ) {
 
-										if ( lastElementInResult === CLOSEQUOTES ) {
-											result += currentValue, lastElementInResult = currentValue;
-											counterCloseQuotes++;
+										// if ( lastElementInResult === CLOSEQUOTES ) {
+										// 	result += currentValue, lastElementInResult = currentValue;
+										// 	counterCloseQuotes++;
 
-										} else
+										// } else
 
-											if ( checkNumber( lastElementInResult ) ) {
+											if ( numbers( lastElementInResult ) ) {
 												result += currentValue, lastElementInResult = currentValue;
 												counterCloseQuotes++;
 
@@ -343,67 +355,57 @@
 				}
 		}
 
-		return result
+		return string;
 	};
 
 	Calculator.fn.getTotalSum = function( list ) {
 
-		var numberLeft,
-			numberRight,
-			action,
-			result;
+        var action_1 = ['*','/'],
+            action_2 = ['+','-'];
 
-		for ( var l = 0, i = 1, r = 2; l < list.length; i += 2, l += 2, r += 2 ) {
+        function getSum( list, act ) {
 
-			numberLeft = parseFloat( list[ l ] );
-			numberRight = parseFloat( list[ r ] );
-			action = list[ i ];
+            var numberLeft,
+                numberRight,
+                action,
+                result;
 
-			if ( action === '*' || action === '/' ) {
+            for ( var i = 0; i < list.length; i += 2 ) {
 
-				if ( action === '*' ) {
+                numberLeft = parseFloat( list[ i ] );
+                numberRight = parseFloat( list[ i + 2 ] );
+                action = list[ i + 1 ];
 
-					result = getCurrentSum['*']( numberLeft, numberRight );
-					list.splice( l, 3, result );
-					i -= 2, l -= 2, r -= 2;
+                if ( action === act[0] || action === act[1] ) {
 
-				} else
+                    if ( action === act[0] ) {
 
-					if ( action === '/' ) {
+                        result = getCurrentSum[ act[0] ]( numberLeft, numberRight );
+                        list.splice( i, 3, result );
 
-						result = getCurrentSum['/']( numberLeft, numberRight );
-						list.splice( l, 3, result );
-						i -= 2, l -= 2, r -= 2;
-				}
-			}
-		}
+                        if ( i + 1 === list.length ) continue;
+                        else i -= 2;
 
-		for ( var l = 0, i = 1, r = 2; l < list.length; i += 2, l += 2, r += 2 ) {
+                    } else
 
-			numberLeft = parseFloat( list[ l ] );
-			numberRight = parseFloat( list[ r ] );
-			action = list[ i ];
+                        if ( action === act[1] ) {
 
-			if ( action === '+' || action === '-' ) {
+                            result = getCurrentSum[ act[1] ]( numberLeft, numberRight );
+                            list.splice( i, 3, result );
 
-				if ( action === '+' ) {
+                            if ( i + 1 === list.length ) continue;
+                            else i -= 2;
+                    }
+                }
+            }
 
-					result = getCurrentSum['+']( numberLeft, numberRight );
-					list.splice( l, 3, result );
-					i -= 2, l -= 2, r -= 2;
+            return list;
+        }
 
-				} else
+        list = getSum( list, action_1 );
+        list = getSum( list, action_2 );
 
-					if ( action === '-' ) {
-
-						result = getCurrentSum['-']( numberLeft, numberRight );
-						list.splice( l, 3, result );
-						i -= 2, l -= 2, r -= 2;
-					}
-			}
-		}
-
-		return list[ 0 ];
+		return list;///////////////////////////////////////////////
 	};
 
 
