@@ -4,11 +4,11 @@
 
     try{
 
-        console.log( 'RESULT = ', calculator.calculateAmount( '(45-8/7)' ) );
+        console.log( 'RESULT = ', calculator.calculateAmount( '5+6+((2-2)+(8-2))' ) );
 
     } catch( error ) {
 
-        console.info( error.message )
+        console.info( error.message, error )
 
     }
 
