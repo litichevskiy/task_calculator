@@ -8,23 +8,15 @@
 
 	function Calculator() {};
 
-	function isNotCorrect( val, position ) {
-		return{
-			value    : 'Incorrect value: ' + val,
-			position : position,
-            result   : false
-		}
-	};
-
-	var numbers = (function(){
-		var storageNumbers = {
+	var storageNumbers = (function() {
+		var storage = {
 			0 : '0', 1 : '1', 2 : '2',
 			3 : '3', 4 : '4', 5 : '5',
 			6 : '6', 7 : '7', 8 : '8',
 			9 : '9'
 		};
 		return function ( str ) {
-			if ( storageNumbers[str] ) return str;
+			if ( storage[ str ] ) return str;
 			else return false;
 		}
 
@@ -78,11 +70,19 @@
 
 			if ( checkAction( value ) ) {
 
-                result[ currentCounter ] = currentResult;
-                currentCounter++;
-                result[ currentCounter ] = value;
-                currentCounter++;
-                currentResult = '';
+                if( currentResult !== '' ) {
+
+                    result[ currentCounter ] = currentResult;
+                    currentCounter++;
+                    result[ currentCounter ] = value;
+                    currentCounter++;
+                    currentResult = '';
+
+                } else {
+
+                    result[ currentCounter ] = value;
+                    currentCounter++;
+                }
 
             } else
 
@@ -95,7 +95,6 @@
 
 				        currentResult += value;
 					}
-
 		}
 
 		result[ currentCounter ] = currentResult
@@ -107,22 +106,24 @@
 
     Calculator.fn.calculateAmount = function( string ) {
 
-            if( typeof string !== 'string' ) throw('Incorrect value: ', string );
+        if( typeof string !== 'string' ) throw new Error('Incorrect value: ', string );
 
         var data = this.dataValidation( string );
 
-            if ( data.result === false ) return data;
-            else data = this.checkData( data );
+            data = this.validationExpression( data );
 
-            if ( data.result === false ) return data;
-            else data = this.getSumInQuotes( data );
+            if ( data.quotes ) data = this.getSumInQuotes( data.result );
+            else data = sortArray( data );
+            debugger
+            data = this.getItogSum( data );
 
-            data = this.getTotalSum( data );
-
-            if ( typeof data[0] !== 'number' ) return isNotCorrect( data, 0 );
+            data = parseFloat( data[0] );
+            if ( typeof data !== 'number' ) {
+                throw new Error('Incorrect value: '+ data + ', ' + 0 );
+            }
 
             return{
-                result : data[0]
+                result : data
             }
 
     };
@@ -134,35 +135,24 @@
 			currentValue;
 
 		for ( var i = 0; i < length; i++ ) {
-
 			currentValue = string[i];
-
-			if ( numbers( currentValue ) ) {
-
+			if ( storageNumbers( currentValue ) ) {
 				result += currentValue;
-
 			} else
-
 				if( checkSimbol( currentValue ) ) {
-
 						result += currentValue;
-
 				} else
-
 					if ( checkAction( currentValue ) ) {
-
 						result += currentValue;
-
 					} else {
-
-						return isNotCorrect( currentValue, i );
+						throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 					}
 		}
 
 		return result;
 	}
 
-	Calculator.fn.checkData = function ( string ) {
+	Calculator.fn.validationExpression = function ( string ) {
 
 		var length = string.length,
 			valuePlus = '+',
@@ -179,143 +169,113 @@
 
 			if ( result.length >= 1 ) {
 
-				if ( numbers( currentValue ) ) {
-
-					if ( numbers( lastElementInResult ) ) {
+				if ( storageNumbers( currentValue ) ) {
+					if ( storageNumbers( lastElementInResult ) ) {
 						result += currentValue, lastElementInResult = currentValue;
-
 					} else
-
 						if ( ( checkAction( lastElementInResult ) ) ) {
 							result += currentValue, lastElementInResult = currentValue;
-
 						} else
-
 							if ( lastElementInResult === OPENQUOTES ) {
 								result += currentValue, lastElementInResult = currentValue;
-
 							} else
-
 								if ( lastElementInResult === POINT ) {
 									result += currentValue, lastElementInResult = currentValue;
-
 								} else {
-
-									return isNotCorrect( currentValue, i );
+									throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 								}
 
 				} else
 
 					if ( checkAction( currentValue ) ) {
-
-						if ( numbers( lastElementInResult ) ) {
+						if ( storageNumbers( lastElementInResult ) ) {
 							result += currentValue, lastElementInResult = currentValue;
-
 						} else
-
 							if ( lastElementInResult === CLOSEQUOTES ) {
 								result += currentValue, lastElementInResult = currentValue;
-
 							} else
-
 								if ( lastElementInResult === OPENQUOTES && currentValue === valuePlus ) {
 									result += currentValue, lastElementInResult = currentValue;
-
 								} else
-
 									if ( lastElementInResult === OPENQUOTES && currentValue === valueMinus ) {
 										result += currentValue, lastElementInResult = currentValue;
-
 									} else {
-
-										return isNotCorrect( currentValue, i );
+										throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 									}
 
 					} else
 
 						if ( currentValue === OPENQUOTES ) {
-
 							if ( lastElementInResult === OPENQUOTES ) {
 								result += currentValue, lastElementInResult = currentValue;
 								counterOpenQuotes++;
-
 							} else
-
 								if ( checkAction( lastElementInResult ) ) {
 									result += currentValue, lastElementInResult = currentValue;
 									counterOpenQuotes++;
-
 								} else {
-
-										return isNotCorrect( currentValue, i );
+										throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 									}
 
 								} else
 
 									if ( currentValue === CLOSEQUOTES ) {
-
-										// if ( lastElementInResult === CLOSEQUOTES ) {
-										// 	result += currentValue, lastElementInResult = currentValue;
-										// 	counterCloseQuotes++;
-
-										// } else
-
-											if ( numbers( lastElementInResult ) ) {
+										if ( lastElementInResult === CLOSEQUOTES ) {
+											result += currentValue, lastElementInResult = currentValue;
+											counterCloseQuotes++;
+										} else
+											if ( storageNumbers( lastElementInResult ) ) {
 												result += currentValue, lastElementInResult = currentValue;
 												counterCloseQuotes++;
-
 											} else {
-
-												return isNotCorrect( currentValue, i );
+												throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 											}
 									} else
 
 									if ( currentValue === POINT ) {
-
-										if ( numbers( lastElementInResult ) ) {
+										if ( storageNumbers( lastElementInResult ) ) {
 											result += currentValue, lastElementInResult = currentValue;
-
 										} else {
-
-											return isNotCorrect( currentValue, i );
+                                            throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 										}
 
 									} else {
-
-										return isNotCorrect( currentValue, i );
+										throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 									}
 
 			} else {
 
 				if ( currentValue === valuePlus || currentValue === valueMinus ) {
-
 					result += currentValue;
 					lastElementInResult = currentValue;
-
 				} else
-
-					if ( numbers( currentValue ) ) {
-
+					if ( storageNumbers( currentValue ) ) {
 							result += currentValue;
 							lastElementInResult = currentValue;
-
 					} else
 
 						if ( currentValue === OPENQUOTES ) {
-
 							result += currentValue;
 							lastElementInResult = currentValue;
 							counterOpenQuotes++;
 
 						} else {
 
-							return isNotCorrect( currentValue, i );
+							throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 						}
 			}
 		}
 
-		if ( counterOpenQuotes === counterCloseQuotes ) return result;
-		else return isNotCorrect( 'incorrect number of quotes', 0 );
+		if ( counterOpenQuotes === counterCloseQuotes ) {
+            if ( counterOpenQuotes > 0 ) {
+                return{
+                    result : result,
+                    quotes : true
+                }
+            } else return result;
+        }
+		else throw new Error( 'incorrect number of quotes' + ', ' + 0 );
+
 	};
 
 	Calculator.fn.getSumInQuotes = function( string ) {
@@ -340,14 +300,14 @@
 					result = sortArray( result );
 
 					if ( result.length % 2 === 0 ) {
-						result = parseFloat( result[0] + result[1] );
+	 					result = result[0] + result[1];
 						string.splice( cashPosition, i + 1 - cashPosition, result + '' )
 						cashPosition = 0;
 						i = -1;
 
 					} else {
 
-							result = this.getTotalSum( result );
+							result = this.getItogSum( result );
 							string.splice( cashPosition, i + 1 - cashPosition, result + '' )
 							cashPosition = 0;
 							i = -1;
@@ -357,55 +317,93 @@
 
 		return string;
 	};
-
-	Calculator.fn.getTotalSum = function( list ) {
+///////////////////////////////////////////////////////////////////////
+	Calculator.fn.getItogSum = function( list ) {
 
         var action_1 = ['*','/'],
-            action_2 = ['+','-'];
+            action_2 = ['+','-'],
+            numberLeft,
+            numberRight,
+            result;
 
-        function getSum( list, act ) {
+        if ( list.length === 1 ) return list;////// ?????
 
-            var numberLeft,
-                numberRight,
-                action,
-                result;
+        function getSum( act, numberLeft, action, numberRight ) {
 
-            for ( var i = 0; i < list.length; i += 2 ) {
+            var result;
 
-                numberLeft = parseFloat( list[ i ] );
-                numberRight = parseFloat( list[ i + 2 ] );
-                action = list[ i + 1 ];
+            if ( action === act[0] || action === act[1] ) {
 
-                if ( action === act[0] || action === act[1] ) {
+                if ( action === act[0] ) {
 
-                    if ( action === act[0] ) {
+                    result = getCurrentSum[act[0]](
+                                parseFloat( numberLeft ), parseFloat( numberRight )
+                            );
 
-                        result = getCurrentSum[ act[0] ]( numberLeft, numberRight );
-                        list.splice( i, 3, result );
+                } else
 
-                        if ( i + 1 === list.length ) continue;
-                        else i -= 2;
+                    if ( action === act[1] ) {
 
-                    } else
-
-                        if ( action === act[1] ) {
-
-                            result = getCurrentSum[ act[1] ]( numberLeft, numberRight );
-                            list.splice( i, 3, result );
-
-                            if ( i + 1 === list.length ) continue;
-                            else i -= 2;
-                    }
+                        result = getCurrentSum[act[1]](
+                                    parseFloat( numberLeft ), parseFloat( numberRight )
+                                );
                 }
             }
 
-            return list;
+            return result;
         }
 
-        list = getSum( list, action_1 );
-        list = getSum( list, action_2 );
+        for ( var i = 0; i < list.length; i += 2 ) {
 
-		return list;///////////////////////////////////////////////
+            numberLeft = list[ i ];
+
+            if ( parseFloat( numberLeft ) / 2 ) {
+
+                numberRight = list[ i + 2 ];
+                action = list[ i + 1 ];
+
+                if ( action === '*' || action === '/' ) {
+
+                    result = getSum( action_1, numberLeft, action, numberRight );
+                    list.splice( i, 3, result + '' );
+                }
+
+            } else if ( checkAction( numberLeft[ 0 ] ) ) {
+
+                var newValue = numberLeft[ i ] + list[ i + 1 ];
+                list.splice( i, 2, newValue );
+                i -= 2;
+                continue;
+
+            } else throw new Error( 'unknown value :' + numberLeft );
+        }
+
+        for ( var i = 0; i < list.length; i += 2 ) {
+
+            numberLeft = list[ i ];
+
+            if ( parseFloat( numberLeft ) / 2 ) {
+
+                numberRight = list[ i + 2 ];
+                action = list[ i + 1 ];
+
+                if ( action === '+' || action === '-' ) {
+
+                    result = getSum( action_2, numberLeft, action, numberRight );
+                    list.splice( i, 3, result + '' );
+                }
+
+            } else if ( checkAction( numberLeft[ 0 ] ) ) {
+
+                var newValue = numberLeft[ i ] + list[ i + 1 ];
+                list.splice( i, 2, newValue );
+                i -= 2;
+                continue;
+
+            } else throw new Error( 'unknown value :' + numberLeft );
+        }
+
+		return list;
 	};
 
 
