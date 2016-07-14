@@ -10,21 +10,7 @@
 
 	function Calculator() {};
 
-	var checkNumbers = (function() {
-		var storage = {
-			0 : '0', 1 : '1', 2 : '2',
-			3 : '3', 4 : '4', 5 : '5',
-			6 : '6', 7 : '7', 8 : '8',
-			9 : '9'
-		};
-		return function ( str ) {
-			if ( storage[ str ] ) return str;
-			else return false;
-		}
-
-	})();
-
-	var getTotalSum = {
+	var getSum = {
 		'+' : function( a, b ) { return a + b },
 		'-' : function( a, b ) { return a - b },
 		'*' : function( a, b ) { return a * b },
@@ -35,18 +21,7 @@
 		return str.replace( /\s/g, '' );
 	}
 
-	var checkSimbol = (function() {
-		var storageSimbol = ['(',')','.'];
-		return function( val ) {
-			var index = storageSimbol.indexOf( val );
-
-			if ( index < 0 ) return false;
-			else return val;
-		}
-
-	})();
-
-	var checkAction = (function(){
+	var isAction = (function(){
 		var storageAction = ['*','/','+','-'];
 		return function ( val ) {
 			var index = storageAction.indexOf( val );
@@ -57,114 +32,19 @@
 
 	})();
 
-	function convertDataIntoNumbers( list ) {
+    Calculator.fn = Calculator.prototype;
 
-        if ( list.length === 1 ) return parseFloat( list );
-
-		var length = list.length,
-			currentResult = '',
-			currentCounter = 0,
-			result = [],
-			value,
-			currentValue;
-
-		for ( var i = 0, k = 1; i < length; i++ ) {
-
-            value = list[i];
-
-            if ( i > 0 ) {
-
-                if ( list[ i ] === POINT || checkNumbers( value ) ) {
-                    currentValue += value;
-
-                } else
-                    if ( checkAction( value ) ) {
-                        if ( currentValue !== '' ) {
-                            result.push( parseFloat( currentValue ));
-                            currentValue = '';
-                        }
-
-                        if ( value === '*' || value === '/' ) {
-                            result.push( value );
-                        } else
-                            if ( value === '+' || value === '-' ) {
-
-                                var num = parseFloat( result[ result.length -1 ] );
-
-                                if( num >= 0 || num <= 0 ) {
-                                    result.push( value );
-                                } else {
-
-                                    currentValue = value;
-                                    k = i + 1;
-
-                                    while( k < list.length ) {
-
-                                        if ( checkNumbers( list[ k ] ) ) {
-                                            currentValue += list[ k ];
-                                            k++;
-
-                                            if ( k === list.length ) {
-                                                result.push( parseFloat( currentValue ) );
-                                                currentValue = '';
-                                                i = k - 1;
-                                            }
-                                        } else {
-
-                                            result.push( parseFloat( currentValue ) );
-                                            currentValue = '';
-                                            i = k - 1;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                    }
-
-            } else {
-
-                if ( checkAction( value ) ) {
-
-                    currentValue = value;
-
-                    while( k < list.length ) {
-
-                        if ( list[ k ] === POINT || checkNumbers( list[ k ] ) ) {
-                            currentValue += list[ k ];
-                            k++;
-                            i = k -1;
-                        } else {
-                            result.push( parseFloat( currentValue ) );
-                            currentValue = '';
-                            break;
-                        }
-                    }
-
-                } else {
-                    currentValue = value;
-                    continue;
-                }
-            }
-		}
-
-		if ( currentValue !== '' ) result.push( parseFloat( currentValue ) );
-		return result;
-	}
-
-
-	Calculator.fn = Calculator.prototype;
-
-    Calculator.fn.calculateAmount = function( string ) {
+    Calculator.fn.calculateSum = function( string ) {
 
         if( typeof string !== 'string' ) throw new Error('Incorrect value: ', string );
 
-        var data = this.dataValidation( string );
+        var data = this.searchForInvalidCharacters( string );
             data = this.validationString( data );
 
             if ( data.quotes ) data = this.getSumInQuotes( data.result );
 
-            if ( data.length > 0 ) data = convertDataIntoNumbers( data );
-            if ( data.length > 0 ) data = this.getItogSum( data );
+            if ( data.length > 1 ) data = this.convertDataIntoNumbers( data );
+            if ( data.length > 1 ) data = this.SearchOrderOfArithmeticOperations( data );
             if ( typeof data !== 'number' ) {
                 throw new Error('Incorrect value: '+ data + ', ' + 0 );
             }
@@ -175,7 +55,54 @@
 
     };
 
-	Calculator.fn.dataValidation = function( string ) {
+    Calculator.fn.convertDataIntoNumbers = function( list ) {
+
+        if ( list.length === 1 ) return parseFloat( list );
+
+        var length = list.length,
+            currentResult = '',
+            currentCounter = 0,
+            result = [],
+            value,
+            currentValue;
+
+        for ( var i = 0, k = 1; i < length; i++ ) {
+
+            value = list[i];
+
+            if ( i > 0 ) {
+
+                if ( list[ i ] === POINT || !isNaN( value ) ) {
+                    currentValue += value;
+
+                } else
+                    if ( isAction( value ) ) {
+                        if ( currentValue !== '' ) {
+                            result.push( parseFloat( currentValue ));
+                            currentValue = '';
+                        }
+
+                        if ( value === '*' || value === '/' ) {
+                            result.push( value );
+                        } else
+                            if ( value === '+' || value === '-' ) {
+
+                                if( !isNaN( result[ result.length -1 ] ) ) {
+                                    result.push( value );
+
+                                } else  currentValue = value;
+                            }
+                    }
+
+            } else currentValue = value;
+        }
+
+        if ( currentValue !== '' ) result.push( parseFloat( currentValue ) );
+        return result;
+    }
+
+
+	Calculator.fn.searchForInvalidCharacters = function( string ) {
 
         if( string.search(/[0-9]/) === -1 ) throw new Error('incorrect value' + string )
 
@@ -185,13 +112,16 @@
 
 		for ( var i = 0; i < length; i++ ) {
 			currentValue = string[i];
-			if ( checkNumbers( currentValue ) ) {
+			if ( !isNaN( currentValue ) ) {
 				result += currentValue;
 			} else
-				if( checkSimbol( currentValue ) ) {
+				if( currentValue === OPENQUOTES  ||
+                    currentValue === CLOSEQUOTES ||
+                    currentValue === POINT  )
+                {
 						result += currentValue;
 				} else
-					if ( checkAction( currentValue ) ) {
+					if ( isAction( currentValue ) ) {
 						result += currentValue;
 					} else {
 						throw new Error('Incorrect value: '+ currentValue + ', ' + i );
@@ -204,8 +134,6 @@
 	Calculator.fn.validationString = function ( string ) {
 
         var length = string.length,
-            valuePlus = '+',
-            valueMinus = '-',
             counterOpenQuotes = 0,
             counterCloseQuotes = 0,
             result = '',
@@ -218,10 +146,10 @@
 
             if ( result.length >= 1 ) {
 
-                if ( checkNumbers( currentValue ) ) {
+                if ( !isNaN( currentValue ) ) {
 
                    if( !isNaN( lastElementInResult )       ||
-                        checkAction( lastElementInResult ) ||
+                        isAction( lastElementInResult ) ||
                         lastElementInResult === OPENQUOTES ||
                         lastElementInResult === POINT
                     ) {
@@ -231,12 +159,12 @@
 
                 } else
 
-                    if ( checkAction( currentValue ) ) {
+                    if ( isAction( currentValue ) ) {
 
-                        if ( checkNumbers( lastElementInResult ) ||
+                        if ( !isNaN( lastElementInResult ) ||
                              lastElementInResult === CLOSEQUOTES ||
-                             lastElementInResult === OPENQUOTES && currentValue === valuePlus  ||
-                             lastElementInResult === OPENQUOTES && currentValue === valueMinus ||
+                             lastElementInResult === OPENQUOTES && currentValue === PLUS  ||
+                             lastElementInResult === OPENQUOTES && currentValue === MINUS ||
                              lastElementInResult === PLUS && currentValue === PLUS  ||
                              currentValue === MINUS ||
                              lastElementInResult === MINUS && currentValue === PLUS ||
@@ -251,7 +179,7 @@
                         if ( currentValue === OPENQUOTES ) {
 
                             if ( lastElementInResult === OPENQUOTES ||
-                                 checkAction( lastElementInResult )
+                                 isAction( lastElementInResult )
                             ) {
                                result += currentValue, lastElementInResult = currentValue;
                                 counterOpenQuotes++;
@@ -266,7 +194,7 @@
                                     result += currentValue, lastElementInResult = currentValue;
                                     counterCloseQuotes++;
                                 } else
-                                    if ( checkNumbers( lastElementInResult ) ) {
+                                    if ( !isNaN( lastElementInResult ) ) {
                                         result += currentValue, lastElementInResult = currentValue;
                                         counterCloseQuotes++;
                                     } else {
@@ -275,7 +203,7 @@
                             } else
 
                                 if ( currentValue === POINT ) {
-                                    if ( checkNumbers( lastElementInResult ) ) {
+                                    if ( !isNaN( lastElementInResult ) ) {
                                         result += currentValue, lastElementInResult = currentValue;
                                     } else {
                                         throw new Error('Incorrect value: '+ currentValue + ', ' + i );
@@ -286,10 +214,10 @@
                                 }
 
             } else {
-                if ( currentValue === valuePlus || currentValue === valueMinus ) {
+                if ( currentValue === PLUS || currentValue === MINUS ) {
                     result += currentValue, lastElementInResult = currentValue;
                 } else
-                    if ( checkNumbers( currentValue ) ) {
+                    if ( !isNaN( currentValue ) ) {
                             result += currentValue, lastElementInResult = currentValue;
                     } else
                         if ( currentValue === OPENQUOTES ) {
@@ -332,11 +260,11 @@
 
 				if ( currentValue === CLOSEQUOTES ) {
 					result = string.slice( cashPosition + 1, i );
-					result = convertDataIntoNumbers( result );
+					result = this.convertDataIntoNumbers( result );
 
     				if ( result.length > 1 ) {
 
-                        result = this.getItogSum( result );
+                        result = this.SearchOrderOfArithmeticOperations( result );
                         string.splice( cashPosition, i + 1 - cashPosition, result + '' );
                         cashPosition = 0;
                         i = -1;
@@ -351,18 +279,18 @@
 		return string;
 	};
 
-	Calculator.fn.getItogSum = function( list ) {
+	Calculator.fn.SearchOrderOfArithmeticOperations = function( list ) {
 
         var result, value;
 
-        if ( list.length === 1 ) return parseFloat( list );
+        if ( list.length === 1 || list.length === 2 ) return parseFloat( list );
 
         for ( var i = 1; i < list.length; i += 2 ) {
 
             value = list[i];
 
             if ( value === '*' || value === '/' ) {
-                result = getTotalSum[ value ]( list[ i - 1 ], list[ i + 1 ] );
+                result = getSum[ value ]( list[ i - 1 ], list[ i + 1 ] );
                 list.splice( i - 1, 3, result );
                 i -= 2;
             }
@@ -373,7 +301,7 @@
             value = list[i];
 
             if ( value === '+' || value === '-' ) {
-                result = getTotalSum[ value ]( list[ i - 1 ], list[ i + 1 ] );
+                result = getSum[ value ]( list[ i - 1 ], list[ i + 1 ] );
                 list.splice( i - 1, 3, result );
                 i -= 2;
             }
