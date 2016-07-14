@@ -91,7 +91,7 @@
 
                                 var num = parseFloat( result[ result.length -1 ] );
 
-                                if( num >= 0 ) {
+                                if( num >= 0 || num <= 0 ) {
                                     result.push( value );
                                 } else {
 
@@ -159,9 +159,10 @@
         if( typeof string !== 'string' ) throw new Error('Incorrect value: ', string );
 
         var data = this.dataValidation( string );
-            data = this.validationExpression( data );
+            data = this.validationString( data );
 
             if ( data.quotes ) data = this.getSumInQuotes( data.result );
+
             if ( data.length > 0 ) data = convertDataIntoNumbers( data );
             if ( data.length > 0 ) data = this.getItogSum( data );
             if ( typeof data !== 'number' ) {
@@ -175,6 +176,8 @@
     };
 
 	Calculator.fn.dataValidation = function( string ) {
+
+        if( string.search(/[0-9]/) === -1 ) throw new Error('incorrect value' + string )
 
 		var result = '',
 			length = string.length,
@@ -198,7 +201,7 @@
 		return result;
 	}
 
-	Calculator.fn.validationExpression = function ( string ) {
+	Calculator.fn.validationString = function ( string ) {
 
 		var length = string.length,
 			valuePlus = '+',
@@ -351,25 +354,17 @@
 					result = string.slice( cashPosition + 1, i );
 					result = convertDataIntoNumbers( result );
 
-					if ( result.length % 2 === 0 ) {
-                        console.log( 'RESULT.LENGTH % 2 === 0 ' );
-	 					result = result[0] + result[1];
-						string.splice( cashPosition, i + 1 - cashPosition, result ); //+ ''
-						cashPosition = 0;
-						i = -1;
+    				if ( result.length > 1 ) {
 
-					}
-                    else {
+                        result = this.getItogSum( result );
+                        string.splice( cashPosition, i + 1 - cashPosition, result + '' );
+                        cashPosition = 0;
+                        i = -1;
+                    }
+                    else{
 
-    						if ( result.length > 1 ) {
-
-                                result = this.getItogSum( result );
-                                string.splice( cashPosition, i + 1 - cashPosition, result + '' );
-                                cashPosition = 0;
-                                i = -1;
-                            }
-                            else return result;
-						}
+                        string.splice( cashPosition, i + 1 - cashPosition, result + '' );
+                    }
 				}
 		}
 
@@ -380,7 +375,7 @@
 
         var result, value;
 
-        if ( list.length === 1 ) return list;
+        if ( list.length === 1 ) return parseFloat( list );
 
         for ( var i = 1; i < list.length; i += 2 ) {
 
