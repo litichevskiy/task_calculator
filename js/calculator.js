@@ -203,125 +203,106 @@
 
 	Calculator.fn.validationString = function ( string ) {
 
-		var length = string.length,
-			valuePlus = '+',
-			valueMinus = '-',
-			counterOpenQuotes = 0,
-			counterCloseQuotes = 0,
-			result = '',
-			currentValue,
-			lastElementInResult;
+        var length = string.length,
+            valuePlus = '+',
+            valueMinus = '-',
+            counterOpenQuotes = 0,
+            counterCloseQuotes = 0,
+            result = '',
+            currentValue,
+            lastElementInResult;
 
-		for ( var i = 0; i < length; i++ ) {
+        for ( var i = 0; i < length; i++ ) {
 
-			currentValue = string[i];
+            currentValue = string[i];
 
-			if ( result.length >= 1 ) {
+            if ( result.length >= 1 ) {
 
-				if ( checkNumbers( currentValue ) ) {
-					if ( checkNumbers( lastElementInResult ) ) {
-						result += currentValue, lastElementInResult = currentValue;
-					} else
-						if ( ( checkAction( lastElementInResult ) ) ) {
-							result += currentValue, lastElementInResult = currentValue;
-						} else
-							if ( lastElementInResult === OPENQUOTES ) {
-								result += currentValue, lastElementInResult = currentValue;
-							} else
-								if ( lastElementInResult === POINT ) {
-									result += currentValue, lastElementInResult = currentValue;
-								} else {
-									throw new Error('Incorrect value: '+ currentValue + ', ' + i );
-								}
+                if ( checkNumbers( currentValue ) ) {
 
-				} else
+                   if( !isNaN( lastElementInResult )       ||
+                        checkAction( lastElementInResult ) ||
+                        lastElementInResult === OPENQUOTES ||
+                        lastElementInResult === POINT
+                    ) {
+                          result += currentValue, lastElementInResult = currentValue;
+                      }
+                      else throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 
-					if ( checkAction( currentValue ) ) {
-						if ( checkNumbers( lastElementInResult ) ) {
-							result += currentValue, lastElementInResult = currentValue;
-						} else
-							if ( lastElementInResult === CLOSEQUOTES ) {
-								result += currentValue, lastElementInResult = currentValue;
-							} else
-								if ( lastElementInResult === OPENQUOTES && currentValue === valuePlus ) {
-									result += currentValue, lastElementInResult = currentValue;
-								} else
-									if ( lastElementInResult === OPENQUOTES && currentValue === valueMinus ) {
-										result += currentValue, lastElementInResult = currentValue;
-									} else
-                                        if ( lastElementInResult === PLUS && currentValue === PLUS || currentValue === MINUS ) {
-                                            result += currentValue, lastElementInResult = currentValue;
-									   } else
-                                            if ( lastElementInResult === MINUS && currentValue === PLUS || currentValue === MINUS ) {
-                                                result += currentValue, lastElementInResult = currentValue;
-                                            } else {
-                                                throw new Error('Incorrect value: '+ currentValue + ', ' + i );
-                                            }
+                } else
 
-					} else
+                    if ( checkAction( currentValue ) ) {
 
-						if ( currentValue === OPENQUOTES ) {
-							if ( lastElementInResult === OPENQUOTES ) {
-								result += currentValue, lastElementInResult = currentValue;
-								counterOpenQuotes++;
-							} else
-								if ( checkAction( lastElementInResult ) ) {
-									result += currentValue, lastElementInResult = currentValue;
-									counterOpenQuotes++;
-								} else {
-										throw new Error('Incorrect value: '+ currentValue + ', ' + i );
-									}
+                        if ( checkNumbers( lastElementInResult ) ||
+                             lastElementInResult === CLOSEQUOTES ||
+                             lastElementInResult === OPENQUOTES && currentValue === valuePlus  ||
+                             lastElementInResult === OPENQUOTES && currentValue === valueMinus ||
+                             lastElementInResult === PLUS && currentValue === PLUS  ||
+                             currentValue === MINUS ||
+                             lastElementInResult === MINUS && currentValue === PLUS ||
+                             currentValue === MINUS
+                        ) {
+                            result += currentValue, lastElementInResult = currentValue;
+                          }
+                        else throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 
-								} else
+                    } else
 
-									if ( currentValue === CLOSEQUOTES ) {
-										if ( lastElementInResult === CLOSEQUOTES ) {
-											result += currentValue, lastElementInResult = currentValue;
-											counterCloseQuotes++;
-										} else
-											if ( checkNumbers( lastElementInResult ) ) {
-												result += currentValue, lastElementInResult = currentValue;
-												counterCloseQuotes++;
-											} else {
-												throw new Error('Incorrect value: '+ currentValue + ', ' + i );
-											}
-									} else
+                        if ( currentValue === OPENQUOTES ) {
 
-									if ( currentValue === POINT ) {
-										if ( checkNumbers( lastElementInResult ) ) {
-											result += currentValue, lastElementInResult = currentValue;
-										} else {
-                                            throw new Error('Incorrect value: '+ currentValue + ', ' + i );
-										}
+                            if ( lastElementInResult === OPENQUOTES ||
+                                 checkAction( lastElementInResult )
+                            ) {
+                               result += currentValue, lastElementInResult = currentValue;
+                                counterOpenQuotes++;
+                            }
+                            else throw new Error('Incorrect value: '+ currentValue + ', ' + i );
 
-									} else {
-										throw new Error('Incorrect value: '+ currentValue + ', ' + i );
-									}
+                        } else
 
-			} else {
+                            if ( currentValue === CLOSEQUOTES ) {
 
-				if ( currentValue === valuePlus || currentValue === valueMinus ) {
-					result += currentValue;
-					lastElementInResult = currentValue;
-				} else
-					if ( checkNumbers( currentValue ) ) {
-							result += currentValue;
-							lastElementInResult = currentValue;
-					} else
+                                if ( lastElementInResult === CLOSEQUOTES ) {
+                                    result += currentValue, lastElementInResult = currentValue;
+                                    counterCloseQuotes++;
+                                } else
+                                    if ( checkNumbers( lastElementInResult ) ) {
+                                        result += currentValue, lastElementInResult = currentValue;
+                                        counterCloseQuotes++;
+                                    } else {
+                                        throw new Error('Incorrect value: '+ currentValue + ', ' + i );
+                                    }
+                            } else
 
-						if ( currentValue === OPENQUOTES ) {
-							result += currentValue;
-							lastElementInResult = currentValue;
-							counterOpenQuotes++;
+                                if ( currentValue === POINT ) {
+                                    if ( checkNumbers( lastElementInResult ) ) {
+                                        result += currentValue, lastElementInResult = currentValue;
+                                    } else {
+                                        throw new Error('Incorrect value: '+ currentValue + ', ' + i );
+                                    }
 
-						} else {
+                                } else {
+                                    throw new Error('Incorrect value: '+ currentValue + ', ' + i );
+                                }
 
-							throw new Error('Incorrect value: '+ currentValue + ', ' + i );
-						}
-			}
-		}
+            } else {
+                if ( currentValue === valuePlus || currentValue === valueMinus ) {
+                    result += currentValue, lastElementInResult = currentValue;
+                } else
+                    if ( checkNumbers( currentValue ) ) {
+                            result += currentValue, lastElementInResult = currentValue;
+                    } else
+                        if ( currentValue === OPENQUOTES ) {
+                            result += currentValue, lastElementInResult = currentValue;
+                            counterOpenQuotes++;
 
-		if ( counterOpenQuotes === counterCloseQuotes ) {
+                        } else {
+                            throw new Error('Incorrect value: '+ currentValue + ', ' + i );
+                        }
+            }
+        }
+
+        if ( counterOpenQuotes === counterCloseQuotes ) {
             if ( counterOpenQuotes > 0 ) {
                 return{
                     result : result,
@@ -329,9 +310,8 @@
                 }
             } else return result;
         }
-		else throw new Error( 'incorrect number of quotes' + ', ' + 0 );
-
-	};
+        else throw new Error( 'incorrect number of quotes' + ', ' + 0 );
+    };
 
 	Calculator.fn.getSumInQuotes = function( string ) {
 
