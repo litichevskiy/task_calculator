@@ -1,0 +1,15 @@
+.container_calc{
+    position: absolute;
+    top: 2em;
+    left: 2em;
+    width: 20em;
+    height: 18em;
+    min-width: 10em;
+    min-height: 10em;
+    border: 1px solid lightgrey;
+    display: flex;
+    flex-direction: column;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}

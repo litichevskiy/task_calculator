@@ -1,0 +1,21 @@
+.container_entry_field{
+    position: relative;
+    width: 100%;
+    height: 25%;
+    border-bottom: 1px solid lightgrey;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: #F5FAFE;
+}
+.field_for_text{
+    width: 95%;
+    box-sizing: border-box;
+    font-size: x-large;
+    color: grey;
+    border: 1px solid lightgrey;
+    outline: none;
+    padding: 0 5px 0 5px;
+    height: 80%;
+}

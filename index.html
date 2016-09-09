@@ -3,8 +3,55 @@
 	<head>
 		<title>calculator</title>
 		<meta charset="utf-8" >
+        <link rel="stylesheet" type="text/css" href="./css/main.css">
+        <link rel="stylesheet" type="text/css" href="./css/block_numbers.css">
+        <link rel="stylesheet" type="text/css" href="./css/block_text_field.css">
+        <link rel="stylesheet" type="text/css" href="./css/block_actions.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 	</head>
 	<body>
+        <div class="container_calc">
+            <div class="container_entry_field">
+                <input autofocus class="field_for_text"></input>
+            </div>
+            <div class="block_keyboard">
+                <div class="block_numbers">
+                    <ul class="list_buttons">
+                        <li data-val="1">1</li>
+                        <li data-val="2">2</li>
+                        <li data-val="3">3</li>
+                    </ul>
+                    <ul class="list_buttons">
+                        <li data-val="4">4</li>
+                        <li data-val="5">5</li>
+                        <li data-val="6">6</li>
+                    </ul>
+                    <ul class="list_buttons">
+                        <li data-val="7">7</li>
+                        <li data-val="8">8</li>
+                        <li data-val="9">9</li>
+                    </ul>
+                    <ul class="list_buttons">
+                        <li data-val="0">0</li>
+                        <li data-val=".">.</li>
+                        <li data-val="=">&#61;</li>
+                    </ul>
+                </div>
+                <div class="block_actions">
+                    <ul class="list_actions">
+                        <li data-val="-">&ndash;</li>
+                        <li data-val="+">&plus;</li>
+                        <li data-val="*">&#215;</li>
+                        <li data-val="/">&#247;</li>
+                        <li data-val="" class="container_quotes">
+                            <span data-val="(" class="quotes">(</span>
+                            <span data-val=")" class="quotes">)</span>
+                        </li>
+                        <li data-val="clear">clear</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 		<script src="./js/calculator.js"></script>
 		<script src="./js/index.js"></script>
 	</body>
