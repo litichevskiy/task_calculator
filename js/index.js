@@ -5,17 +5,6 @@
         input = $('.field_for_text'),
         result;
 
-
-    try{
-
-        console.log( 'RESULT = ', moduleCalculator.calculateSum( '5+6+((2-2)+(8-2))' ) );
-
-    } catch( error ) {
-
-        console.info( error.message )
-
-    }
-
     $(calculator).click(function(event) {
 
         if ( !moduleCalculator ) {
@@ -31,13 +20,30 @@
                 $(input).focus();
             } else
                 if ( targetValue === '=' ) {
-                     try{
-                        result = moduleCalculator.calculateSum( $(input).val() );
-                        $(input).val( result['result'] );
-                    } catch( error ) {
-                        console.info( error.message )
-                    }
+                    getSum();
                 } else  $(input).val( $(input).val() + targetValue );
     });
+
+    $(document).keydown(function(event) {
+        if( event.keyCode === 13 ) {
+            if( $(input).val().length > 0 ){
+                getSum()
+            }
+        }
+    });
+
+    function getSum ( ) {
+
+        try{
+
+            result = moduleCalculator.calculateSum( $(input).val() );
+            $(input).val( result['result'] );
+            $(input).focus();
+
+        } catch( error ) {
+
+            console.info( error.message )
+        }
+    };
 
 })();

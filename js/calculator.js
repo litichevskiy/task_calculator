@@ -43,8 +43,8 @@
 
             if ( data.quotes ) data = this.getSumInQuotes( data.result );
 
-            if ( data.length > 1 ) data = this.convertDataIntoNumbers( data );
-            if ( data.length > 1 ) data = this.SearchOrderOfArithmeticOperations( data );
+            if ( data.length >= 1 ) data = this.convertDataIntoNumbers( data );
+            if ( data.length >= 1 ) data = this.SearchOrderOfArithmeticOperations( data );
             if ( typeof data !== 'number' ) {
                 throw new Error('Incorrect value: '+ data + ', ' + 0 );
             }
