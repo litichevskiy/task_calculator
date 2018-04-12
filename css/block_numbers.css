@@ -1,36 +1,66 @@
 .block_keyboard{
     background-color: lightblue;
-    width: 70%;
+    width: 100%;
     height: 75%;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
     background-color :#F0E5E5;
 }
 .block_numbers{
-    display: flex;
-    flex-direction: column;
     width: 100%;
     height: 100%;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    width: 70%;
+    height: 100%;
+    display: inline-block;
 }
 .list_buttons{
     list-style-type: none;
     margin: 0;
     padding: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: row;
-    justify-content:space-around;
-    height: 26%;
-    align-items: center;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -webkit-justify-content:space-around;
+        -ms-flex-pack:distribute;
+            justify-content:space-around;
+    height: 25%;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
 }
 li[data-val]{
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-justify-content: space-around;
+        -ms-flex-pack: distribute;
+            justify-content: space-around;
     width: 31%;
     background: burlywood;
     height: 90%;
     text-align: center;
     cursor: pointer;
-    border-radius: 5px;
+    -webkit-border-radius: 5px;
+            border-radius: 5px;
     font-family: cursive;
     background-color: #A1DBC3;
     color: #544F4F;
